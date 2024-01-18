@@ -29,11 +29,14 @@ The space of all possible solutions for puzzles with few starting pieces is mass
 To reduce the memory use of puzzle states, I decided to represent each edge with just a single bit -- 0 means the space is free, 1 means it is occupied.
 This also allows using fast bitwise operations to check whether a piece can be placed in a chosen spot (by looking for overlaps) and to combine a piece with a puzzle.
 
+## Optimisations
+
 I also implemented some other optimisations to reduce the search space:
 - We need to try all possible rotations of each digit. For some, there are 4 possible rotations, but for others, there are fewer -- e.g., '0' has only 1 unique rotation while '1' and '8' have 2. For each piece, I precomputed a set of unique rotations.
 - Some digits take up more space than others (e.g., 8, 9, 6), so their possible placements are more limited. Placing these digits first allows to prune many invalid solutions.
 - Memoising configurations that don't lead to any solution
-- Using the profiler, I managed to reduce the overhead of all operations to the point where checking for overlap of a piece and a puzzle is the bottleneck. By precomputing a list of corners which aren't fully occupied, I significantly reduced how many times this is done. Because possible puzzle states branch out, most evaluated states are near the leaves -- when half or more of the puzzle is filled. 
+- As you can see from the profiler output, the performance bottleneck is checking for overlap of a piece and a puzzle. By precomputing a list of corners which aren't fully occupied, I significantly reduced how many times this is done. Because possible puzzle states branch out, most evaluated states are near the leaves -- when half or more of the puzzle is filled. 
+- Fast hashing of pieces and puzzles by flattening and converting to tuples -- this was 10x faster than converting to strings, but relies on the assumption that there won't be any collisions when flattening (does not happen because puzzles are fixed size and works for this particular set of pieces, but not guaranteed to work for all possible pieces)
 
 ## Limitations
 
@@ -42,6 +45,14 @@ I have not implemented this.
 
 In the original game, the pieces are coloured to distinguish between them.
 I didn't implement this and so it can be hard to tell which pieces are where from the board display alone.
+
+## Unimplemented ideas
+
+When solving puzzles manually, I could tell that some configurations are 'doomed' halfway through, because there were more than 2 isolated spaces left, whereas there must be exactly 2 in a complete solution. However, checking isolated spaces left for every puzzle doesn't seem computationally efficient.
+
+For checking piece overlap with puzzle, the bottleneck is mask creation.
+Using a vectorised bitwise shift for vertical offsets is already optimal,
+but horizontal offsets are handled by creating an array of zeros and copying the piece edges at the right offset. There may be a more efficient way of doing this...
 
 ## Acknowledgments
 
