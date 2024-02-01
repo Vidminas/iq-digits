@@ -35,7 +35,7 @@ I also implemented some other optimisations to reduce the search space:
 - We need to try all possible rotations of each digit. For some, there are 4 possible rotations, but for others, there are fewer -- e.g., '0' has only 1 unique rotation while '1' and '8' have 2. For each piece, I precomputed a set of unique rotations.
 - Some digits take up more space than others (e.g., 8, 9, 6), so their possible placements are more limited. Placing these digits first allows to prune many invalid solutions.
 - Memoising configurations that don't lead to any solution
-- As you can see from the profiler output, the performance bottleneck is checking for overlap of a piece and a puzzle. By precomputing a list of corners which aren't fully occupied, I significantly reduced how many times this is done. Because possible puzzle states branch out, most evaluated states are near the leaves -- when half or more of the puzzle is filled. 
+- As you can see from the profiler output, the performance bottleneck is checking for overlap of a piece and a puzzle. By precomputing a list of corners which aren't fully occupied, I significantly reduced how many times this is done. Because possible puzzle states branch out, most evaluated states are near the leaves -- when half or more of the puzzle is filled. This reduced computation time for puzzle 120 from 12h to 1.5h on my laptop 
 - Fast hashing of pieces and puzzles by flattening and converting to tuples -- this was 10x faster than converting to strings, but relies on the assumption that there won't be any collisions when flattening (does not happen because puzzles are fixed size and works for this particular set of pieces, but not guaranteed to work for all possible pieces)
 
 ## Limitations
